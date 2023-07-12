@@ -1,0 +1,57 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+  }
+  
+  h2 {
+    color: black;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    margin-top: 0;
+    margin-bottom: 0;
+    position: absolute;
+    top: 20px;
+    left: 30px;
+  }
+  
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start; /* Adjust alignment to left */
+    margin-bottom: 20px; /* Add margin-bottom to create spacing between form groups */
+  }
+  
+  input[type='text'],
+  input[type='date'],
+  input[type='float'],
+  input[type='img'] {
+    width: 100%;
+    max-width: 100%; /* Update the max-width to 100% to fit the container */
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+    align-items: flex-start;
+  }
+  
+  button[type='submit'] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+  }
+  
+  /* Rest of the CSS styles remain the same */
+  

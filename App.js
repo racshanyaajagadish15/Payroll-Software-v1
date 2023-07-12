@@ -1,89 +1,74 @@
-import React, { useState } from "react";
-import EmployeeDatabase from "./EmployeeDatabase" ;
-import EmployeeForm from "./EmployeeForm";
-const App = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [showDatabase, setShowDatabase] = useState(false);
-  const [employees, setEmployees] = useState([]);
-  const [editedEmployee, setEditedEmployee] = useState(null);
-  const [editMode, setEditMode] = useState(false);
+import React, { useState } from 'react';
+import './App.css';
+import MainPage from './MainPage';
+import EmployeeForm from './EmployeeForm';
+import AttendanceUpload from './AttendanceUpload';
+import ViewProfiles from './ViewProfiles';
+import MonthlyPayCalculation from './MonthlyPayCalculation';
 
-  const handleAddEmployee = (employee) => {
-    const newEmployee = {
-      id: Date.now(),
-      ...employee,
-    };
+function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [isEmployeeDropdownOpen, setIsEmployeeDropdownOpen] = useState(false);
 
-    setEmployees([...employees, newEmployee]);
-    setShowForm(false);
+  const handleNavigation = (page) => {
+    setCurrentPage(page);
   };
 
-  const handleEditEmployee = (id, updatedEmployee) => {
-    const updatedEmployees = employees.map((employee) =>
-      employee.id === id ? { ...employee, ...updatedEmployee } : employee
-    );
-
-    setEmployees(updatedEmployees);
-    setShowForm(false);
+  const toggleEmployeeDropdown = () => {
+    setIsEmployeeDropdownOpen(!isEmployeeDropdownOpen);
   };
 
-  const handleDeleteEmployee = (id) => {
-    const updatedEmployees = employees.filter((employee) => employee.id !== id);
-    setEmployees(updatedEmployees);
-  };
-
-  const handleAddEmployeeClick = () => {
-    setShowForm(true);
-    setShowDatabase(false);
-    setEditMode(false);
-    setEditedEmployee(null);
-  };
-
-  const handleDatabaseClick = () => {
-    setShowForm(false);
-    setShowDatabase(true);
-    setEditMode(false);
-    setEditedEmployee(null);
-  };
-
-  const handleEditClick = (employee) => {
-    setEditedEmployee(employee);
-    setEditMode(true);
-    setShowForm(true);
-    setShowDatabase(false);
-  };
+  let content;
+  if (currentPage === 'home') {
+    content = <MainPage handleNavigation={handleNavigation} />;
+  } else if (currentPage === 'add-employee') {
+    content = <EmployeeForm handleNavigation={handleNavigation} />;
+  } else if (currentPage === 'attendance-upload') {
+    content = <AttendanceUpload handleNavigation={handleNavigation} />;
+  } else if (currentPage === 'view-profiles') {
+    content = <ViewProfiles />;
+  } else if (currentPage === 'employee-pay') {
+    content = <MonthlyPayCalculation />;
+  }
 
   return (
     <div className="app-container">
-      <h1>Payroll Software</h1>
-      <div className="buttons">
-        <div className="item"><table>
-          <th><button onClick={handleAddEmployeeClick}>Add Employee</button></th>
-          <th> <button onClick={handleDatabaseClick}>Employee Database</button></th>
-        </table>
-          
-        </div>
+      <div className="heading">P2E Payroll Software</div>
+      <nav className="navbar">
+        <ul className="nav-menu">
+          <li className={currentPage === 'home' ? 'active' : ''} onClick={() => handleNavigation('home')}>
+            Home
+          </li>
+          <li className={`dropdown ${isEmployeeDropdownOpen ? 'open' : ''}`} onClick={toggleEmployeeDropdown}>
+            <span className="dropdown-label">Employees</span>
+            <span className="dropdown-symbol">&#9662;</span>
+            {isEmployeeDropdownOpen && (
+              <ul className="dropdown-menu">
+                <li onClick={() => handleNavigation('add-employee')}>
+                  <span className="dropdown-menu-symbol">+  </span>
+                  <span className="dropdown-menu-label">Add New Employee</span>
+                </li>
+                <li className="dropdown-menu-item" onClick={() => handleNavigation('attendance-upload')}>
+                  <span className="dropdown-menu-symbol">&#8682;  </span>
+                  <span className="dropdown-menu-label">Attendance Upload</span>
+                </li>
+                <li className="dropdown-menu-item" onClick={() => handleNavigation('view-profiles')}>
+                  <span className="dropdown-menu-symbol">&#128214;  </span>
+                  <span className="dropdown-menu-label">View Profiles</span>
+                </li>
+                <li className="dropdown-menu-item" onClick={() => handleNavigation('employee-pay')}>
+                  <span className="dropdown-menu-symbol">&#128181;  </span>
+                  <span className="dropdown-menu-label">Employee Pay</span>
+                </li>
+              </ul>
+            )}
+          </li>
+        </ul>
+      </nav>
 
-        </div>
-        
-    
-      {showForm && (
-        <EmployeeForm
-          onAddEmployee={handleAddEmployee}
-          onEditEmployee={handleEditEmployee}
-          editedEmployee={editedEmployee}
-          setEditMode={setEditMode}
-        />
-      )}
-      {showDatabase && (
-        <EmployeeDatabase
-          employees={employees}
-          onDeleteEmployee={handleDeleteEmployee}
-          onEditEmployee={handleEditClick}
-        />
-      )}
+      <div className="content">{content}</div>
     </div>
   );
-};
+}
 
 export default App;
