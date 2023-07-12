@@ -1,486 +1,422 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from 'react';
+import './EmployeeForm.css';
+import countryList from 'country-list';
 
-const EmployeeForm = ({
-  onAddEmployee,
-  onEditEmployee,
-  editedEmployee,
-  setEditMode,
-}) => {
+const countries = countryList.getData();
+function EmployeeForm() {
+  const [employee, setEmployee] = useState({
+    employee_ssid: '',
+    employee_name: '',
+    employee_gender: '',
+    employee_address: '',
+    employee_mobile: '',
+    employee_home_phone: '',
+    employee_dob: '',
+    employee_nat_id: '',
+    employee_natidexpiry: '',
+    employee_race: '',
+    employee_nationality: '',
+    employee_basic_salary: '',
+    employee_startdate: '',
+    employee_emergency_name: '',
+    employee_emergency_phone: '',
+    employee_perm_add: '',
+    employee_photo: null,
+    employee_signature: null,
+  });
 
-  const [employee_ssid, setEmployeeSSID] = useState(editedEmployee ? editedEmployee.employee_ssid : "");
-  const [employee_name, setEmployeeName] = useState(editedEmployee ? editedEmployee.employee_name : "");
-  const [employee_date_of_birth, setemployee_date_of_birth] = useState(editedEmployee ? editedEmployee.employee_date_of_birth : "");
-  const [employee_gender, setEmployeeGender] = useState(editedEmployee ? editedEmployee.employee_gender : "");
-  const [employee_nationality, setEmployeeNationality] = useState(editedEmployee ? editedEmployee.employee_nationality : "");
-  const [employee_address, setemployee_address] = useState(editedEmployee ? editedEmployee.employee_address : "");
-  const [employee_mobile, setemployee_mobile] = useState(editedEmployee ? editedEmployee.employee_mobile : "");
-  const [employee_role, setemployee_role] = useState(editedEmployee ? editedEmployee.employee_role : "");
-  const [company_id, setcompany_id] = useState(editedEmployee ? editedEmployee.company_id : " ");
-  const [employee_home, setemployee_home] = useState(editedEmployee ? editedEmployee.employee_home : "");
-  const [employee_national_id, setemployee_national_id] = useState(editedEmployee ? editedEmployee.employee_national_id : "");
-  const [employee_gov_id_exp, setemployee_gov_id_exp] = useState(editedEmployee ? editedEmployee.employee_gov_id_exp : "");
-  const [employee_race, setemployee_race] = useState(editedEmployee ? editedEmployee.employee_race : "");
-  const [employee_basic_salary, setemployee_basic_salary] = useState(editedEmployee ? editedEmployee.employee_basic_salary : "");
-  const [employee_workingdays, setemployee_workingdays] = useState(editedEmployee ? editedEmployee.employee_workingdays : "");
-  const [employee_start_date, setemployee_start_date] = useState(editedEmployee ? editedEmployee.employee_start_date : "");
-  const [employee_salary_freq, setemployee_salary_freq] = useState(editedEmployee ? editedEmployee.employee_salary_freq : "");
-  const [employee_salary_paymentmode, setemployee_salary_paymentmode] = useState(editedEmployee ? editedEmployee.employee_salary_paymentmode : "");
-  const [employee_emergency_name, setemployee_emergency_name] = useState(editedEmployee ? editedEmployee.employee_emergency_name : "");
-  const [employee_emergency_phone, setemployee_emergency_phone] = useState(editedEmployee ? editedEmployee.employee_emergency_phone : "");
-  const [employee_passport_no, setemployee_passport_no] = useState(editedEmployee ? editedEmployee.employee_passport_no : "");
-  const [employee_name_passport, setemployee_name_passport] = useState(editedEmployee ? editedEmployee.employee_name_passport : "");
-  const [employee_passport_type, setemployee_passport_type] = useState(editedEmployee ? editedEmployee.employee_passport_type : "");
-  const [employee_passport_issue, setemployee_passport_issue] = useState(editedEmployee ? editedEmployee.employee_passport_issue : "");
-  const [employee_passport_expiry, setemployee_passport_expiry] = useState(editedEmployee ? editedEmployee.employee_passport_expiry : "");
-  const [employee_permanent_address, setemployee_permanent_address] = useState(editedEmployee ? editedEmployee.employee_permanent_address : "");
-  const[requiredfield,setRequiredfield]=useState("");
-  const [mobileError, setMobileError] = useState("");
-  const [telephoneError, setTelephoneError] = useState("");
-  const[emergency_contact_phone_error,setEmergencyContacterror] = useState("");
-  const [ssidError, setSSIDError] = useState("");
-  const [workinDayError, setWorkingDaysError] = useState("");
-  const [SalaryError, setSalaryError] = useState("");
- const[CompanyIdError,setCompanyIdError] =useState("");
-
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEmployee({ ...employee, [name]: value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-   
-    // Validate mobile number
-    if (!validateMobile(employee_mobile)) {
-      setMobileError("Invalid mobile number");
-      alert("Invalid mobile number");
-      return;
-    }
-    if(!valiadateEmergencyContactNo(employee_emergency_phone)){
-      setEmergencyContacterror("Invalid employee emergency number");
-      alert("Invalid employee emergency number")
-      return;
-    }
-    // Validate telephone number
-    if (!validateTelephone(employee_home)) {
-      setTelephoneError("Invalid telephone number");
-      alert("Invalid telephone number");
-      return;
-    }
-  
-    // Validate SSID
-    if (!validateSSID(employee_ssid)) {
-      setSSIDError("Invalid SSID (should contain only numbers)");
-      alert("Invalid SSID (should contain only numbers)");
-      return;
-    }
-    if (!validateWorkingDays(employee_workingdays)) {
-      setWorkingDaysError("Number of working days per week must be a number between 1 and 7");
-      alert("Number of working days per week must be a number between 1 and 7");
-      return;
-    }
-    
-     
-    
+     // Perform field validation
+  const errors = {};
 
-    if (!validateBasicSalary(employee_basic_salary)) {
-      setSalaryError("Invalid Basic Salary (should be a number)");
-      alert("Invalid Basic Salary (should be a number)");
-      return;
-    }
-    if (!validateCompanyId(company_id)) {
-      setCompanyIdError("Invalid Company ID (should be a number)");
-      alert("Invalid Company Id (should be a number)");
-      return;
-    }
-    if (employee_name === "") {
-      setRequiredfield("required"); 
-      return;
-    }
-    const newEmployee = {
-      employee_ssid,
-      employee_name,
-      employee_date_of_birth,
-      employee_gender,
-      employee_nationality,
-      employee_mobile,
-      employee_address,
-      employee_role,
-      company_id,
-      employee_gov_id_exp,
-      employee_national_id,
-      employee_race,
-      employee_home,
-      employee_basic_salary,
-      employee_workingdays,
-      employee_start_date,
-      employee_salary_freq,
-      employee_salary_paymentmode,
-      employee_emergency_name,
-      employee_emergency_phone,
-      employee_passport_no,
-      employee_name_passport,
-      employee_passport_type,
-      employee_passport_issue,
-      employee_passport_expiry,
-      employee_permanent_address,
-    };
+  // Validate SID
+  if (!employee.employee_ssid || employee.employee_ssid.length !== 4) {
+    errors.employee_ssid = 'SID must be 4 characters long';
+  }
 
-    if (editedEmployee) {
-      onEditEmployee(editedEmployee.id, newEmployee);
-      setEditMode(false);
-    } else {
-      onAddEmployee(newEmployee);
-    }
+  // Validate Employee Name
+  if (!employee.employee_name) {
+    errors.employee_name = 'Employee Name is required';
+  }
 
-    setEmployeeSSID("");
-    setEmployeeName("");
-    setemployee_date_of_birth("");
-    setEmployeeGender("");
-    setemployee_mobile("")
-    setEmployeeNationality("");
-    setemployee_address("");
-    setemployee_role("");
-    setcompany_id("");
-    setemployee_national_id("");
-    setemployee_gov_id_exp("");
-    setemployee_race("");
-    setemployee_basic_salary("");
-    setemployee_workingdays("");
-    setemployee_start_date("");
-    setemployee_salary_freq("");
-    setemployee_salary_paymentmode("");
-    setemployee_emergency_name("");
-    setemployee_emergency_phone("");
-    setemployee_passport_no("");
-    setemployee_name_passport("");
-    setemployee_passport_type("");
-    setemployee_passport_issue("");
-    setemployee_passport_expiry("");
-    setemployee_permanent_address("");
-    setemployee_home("");
+  // Validate Gender
+  if (!employee.employee_gender) {
+    errors.employee_gender = 'Gender is required';
+  }
 
-    setSalaryError("");
-    setCompanyIdError("");
-    setMobileError("");
-    setEmergencyContacterror("");
-    setTelephoneError("");
-    setSSIDError("");
-    setWorkingDaysError("");
-    setRequiredfield("");
+  // Validate Mobile Number
+  if (!employee.employee_mobile || employee.employee_mobile.length !== 8) {
+    errors.employee_mobile = 'Invalid Mobile Number. Must be in Singapore phone number format';
+  }
+
+  // Validate Home Phone
+  if (!employee.employee_home_phone || employee.employee_home_phone.length !== 8 ) {
+    errors.employee_home_phone = 'Invalid Home Phone. Must be in Singapore phone number format';
+  }
+
+  // Validate Date of Birth
+  if (!employee.employee_dob) {
+    errors.employee_dob = 'Date of Birth is required';
+  }
+
+  // Validate National Identification
+  if (!employee.employee_nat_id || employee.employee_nat_id.length !== 9) {
+    errors.employee_nat_id = 'National Identification must be 9 characters long';
+  }
+
+  // Validate National Identification Expiry
+  const today = new Date();
+  const oneYearFromNow = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+  const natIdExpiryDate = new Date(employee.employee_natidexpiry);
+  if (!employee.employee_natidexpiry || natIdExpiryDate <= oneYearFromNow) {
+    errors.employee_natidexpiry = 'National Identification Expiry must be later than 1 year from today';
+  }
+
+  // Validate Race
+  if (!employee.employee_race) {
+    errors.employee_race = 'Race is required';
+  }
+
+  // Validate Nationality
+  if (!employee.employee_nationality) {
+    errors.employee_nationality = 'Nationality is required';
+  }
+
+  // Validate Basic Salary
+  if (!employee.employee_basic_salary) {
+    errors.employee_basic_salary = 'Basic Salary is required';
+  }
+
+  // Validate Work Start Date
+  if (!employee.employee_startdate) {
+    errors.employee_startdate = 'Work Start Date is required';
+  }
+
+  // Validate Emergency Contact Person
+  if (!employee.employee_emergency_name) {
+    errors.employee_emergency_name = 'Emergency Contact Person is required';
+  }
+
+  // Validate Emergency Phone Number
+  if (!employee.employee_emergency_phone ||employee.employee_emergency_phone.length !== 8) {
+    errors.employee_emergency_phone = 'Invalid Emergency Phone Number. Must be in Singapore phone number format';
+  }
+
+  // Validate Permanent Residence
+  if (!employee.employee_perm_add) {
+    errors.employee_perm_add = 'Permanent Residence is required';
+  }
+
+  // Check if any errors occurred
+  if (Object.keys(errors).length > 0) {
+    // Handle the validation errors
+    console.log(errors);
+    return;
+  }
+    fetch('/employee-add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(employee),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data); // Handle the response data accordingly
+      })
+      .catch((error) => {
+        console.error(error); // Handle any errors
+      });
   };
-  const validateMobile = (employee_mobile) => {
-    const mobilePattern = /^\d{10}$/;
-    return mobilePattern.test(employee_mobile);
-  };
-  
-
-  const validateTelephone = (telephone) => {
-    const telephonePattern = /^\d{3}\d{2}\d{3}$/;
-    return telephonePattern.test(telephone);
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    setEmployee({ ...employee, employee_photo: file });
   };
 
-  const validateSSID = (ssid) => {
-    const ssidPattern = /^\d+$/;
-    return ssidPattern.test(ssid);
-  };
-  const validateWorkingDays = (workingDays) => {
-    const parsedWorkingDays = parseInt(workingDays);
-    return !isNaN(parsedWorkingDays) && parsedWorkingDays >= 1 && parsedWorkingDays <= 7;
-  };
-  const validateBasicSalary = (salary) => {
-    return !isNaN(salary) && isFinite(salary) && salary >= 0;
-  };
-  const validateCompanyId = (companyid) => {
-    return !isNaN(companyid) && isFinite(companyid) && companyid >= 0;
-  };
-  const valiadateEmergencyContactNo =(employee_emergency_phone)=>{
-    const mobilePattern = /^\d{10}$/;
-    return mobilePattern.test(employee_emergency_phone);
-  };
+  const handleSignatureUpload = useCallback((e) => {
+    const file = e.target.files[0];
+    setEmployee({ ...employee, employee_signature: file });
+  }, [employee]);
+ 
   return (
     <div className="container">
-      <div className="card">
-        <div className="card-body">
-          <h2>{editedEmployee ? "Edit Employee" : "Add Employee"}</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="row">
-              <div className="col-md-5">
-                <div className="form-group">
-                  <label>SSID<span className="mandatory_fild" >*</span></label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={employee_ssid}
-                    onChange={(e) => setEmployeeSSID(e.target.value)}
-                    required
-                  />
-                  {ssidError && <p className="error-message">{ssidError}</p>}
-                  
-                </div>
-              </div>
-              <div className="col-md-5">
-                <div className="form-group">
-                  <label>Name<span className="mandatory_fild" >*</span></label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={employee_name}
-                    onChange={(e) => setEmployeeName(e.target.value)}
-                  
-                  />
-                  {requiredfield && <p className="error-message">Please fill this</p>}
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>Date of Birth<span className="mandatory_fild" >*</span></label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={employee_date_of_birth}
-                    onChange={(e) => setemployee_date_of_birth(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-             
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>Gender<span className="mandatory_fild" >*</span></label>
-                  <select
-                    className="form-control"
-                    value={employee_gender}
-                    onChange={(e) => setEmployeeGender(e.target.value)}
-                    required
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>Nationality<span className="mandatory_fild" >*</span></label>
-                  <select
-                    className="form-control"
-                    value={employee_nationality}
-                    onChange={(e) => setEmployeeNationality(e.target.value)}
-                    required>
-                    <option>Nationality 1  </option>
-                    <option >Nationality 2</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>Mobile<span className="mandatory_fild" >*</span></label>
-                  <input
-                    type="text"
-                    value={employee_mobile}
-                    className="form-control"
-                    onChange={(e) => setemployee_mobile(e.target.value)}
-                    required
-                  />
-                  {mobileError && <p className="error-message">{mobileError}</p>}
-                </div>
-              </div>
+     <div class name= "form-container">
+      <h2>Add a new employee profile </h2>
+        <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>SID
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_ssid"
+            value={employee.employee_ssid}
+            onChange={handleInputChange}
+            required
+          />
+        </div> 
 
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>Telephone <span className="mandatory_fild" >*</span></label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={employee_home}
-                    onChange={(e) => setemployee_home(e.target.value)}
-                    required
-                  />
-                  {telephoneError && <p className="error-message">{telephoneError}</p>}
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-12">
-                <div className="form-group">
-                  <label >Address<span className="mandatory_fild" >*</span></label>
-                  <textarea className="form-control" rows={4} value={employee_address} onChange={(e) => setemployee_address(e.target.value)} required />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Company Id<span className="mandatory_fild" >*</span></label>
-                  <input type="text" className="form-control" value={company_id} onChange={(e) => setcompany_id(e.target.value)} required />
-                  {CompanyIdError && <p className="error-message">{CompanyIdError}</p>}
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Designation</label>
-                  <input type="text" className="form-control" value={employee_role} onChange={(e) => setemployee_role(e.target.value)} />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >National Id<span className="mandatory_fild" >*</span></label>
-                  <input type="text" className="form-control" value={employee_national_id} onChange={(e) => setemployee_national_id(e.target.value)} required/>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label > Government ID expiry date <span className="mandatory_fild" >*</span></label>
-                  <input type="date" className="form-control" value={employee_gov_id_exp} onChange={(e) => setemployee_gov_id_exp(e.target.value)} required/>
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-12">
-                <div className="form-group">
-                  <label >Employee Race<span className="mandatory_fild" >*</span></label>
-                  <input className="form-control" value={employee_race} onChange={(e) => setemployee_race(e.target.value)} required />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-12">
-                <div className="form-group">
-                  <label>Photo:</label>
-                  <input
-                    type="file"
-                    className="form-control"
-
-                    accept="image/*"
-
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-12">
-                <div className="form-group">
-                  <label>Number of days the employee works per week</label>
-                  <input type="type" className="form-control" value={employee_workingdays} onChange={(e) => setemployee_workingdays(e.target.value)} />
-                  {workinDayError && <p className="error-message">{workinDayError}</p>}
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Basic Salary<span className="mandatory_fild" >*</span></label>
-                  <input type="type" className="form-control" value={employee_basic_salary} onChange={(e) => setemployee_basic_salary(e.target.value)}required />
-                  {SalaryError && <p className="error-message">{SalaryError}</p>}
-                </div>
-              </div>
-
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Date of started working<span className="mandatory_fild" >*</span></label>
-                  <input type="date" className="form-control" value={employee_start_date} onChange={(e) => setemployee_start_date(e.target.value)} required/>
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Frequency of salary payment for the employee</label>
-                  <input type="text" className="form-control" value={employee_salary_freq} onChange={(e) => setemployee_salary_freq(e.target.value)} />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Mode of salary payment</label>
-                  <input type="text" className="form-control" value={employee_salary_paymentmode} onChange={(e) => setemployee_salary_paymentmode(e.target.value)} />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Emergency Contact Name:</label>
-                  <input type="text" className="form-control" value={employee_emergency_name} onChange={(e) => setemployee_emergency_name(e.target.value)} />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                <div className="form-group">
-    <label>Emergency Contact No</label>
-    <input
-      type="text"
-      className="form-control"
-      value={employee_emergency_phone}
-      onChange={(e) => setemployee_emergency_phone(e.target.value)}
-    />
-    {emergency_contact_phone_error && <p className="error-message">{emergency_contact_phone_error}</p>}
-  </div>
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label >Passport No</label>
-                  <input type="text" className="form-control" value={employee_passport_no} onChange={(e) => setemployee_passport_no(e.target.value)} />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>Name as per in passport</label>
-                  <input type="text" className="form-control" value={employee_name_passport} onChange={(e) => setemployee_name_passport(e.target.value)} />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-12">
-                <div className="form-group">
-                  <label >Passport Type</label>
-                  <input type="text" className="form-control" value={employee_passport_type} onChange={(e) => setemployee_passport_type(e.target.value)} />
-                </div>
-              </div>
-            </div>
-       
-        <div className="row">
-          <div className="col-md-6">
-            <div className="form-group">
-              <label >Issued date of passport</label>
-              <input type="date" className="form-control" value={employee_passport_issue} onChange={(e) => setemployee_passport_issue(e.target.value)} />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="form-group">
-              <label >Expiry date of passport</label>
-              <input type="date" className="form-control" value={employee_passport_expiry} onChange={(e) => setemployee_passport_expiry(e.target.value)} />
-            </div>
-          </div>
+        <div className="form-group">
+          <label>Employee Name
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_name"
+            value={employee.employee_name}
+            onChange={handleInputChange}
+            required
+          />
         </div>
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <label >Permanent Address<span className="mandatory_fild" >*</span></label>
-              <textarea className="form-control" rows={4} value={employee_permanent_address} onChange={(e) => setemployee_permanent_address(e.target.value)}required />
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-7">
-            <div className="form-actions">
-              <button type="submit">{editedEmployee ? "Update" : "Submit"}</button>
 
-            </div>
-          </div>
+        <div className="form-group">
+          <label>Gender
+          <span className="required">*</span>
+          </label>
+          <select
+            className="form-control"
+            name="employee_gender"
+            value={employee.employee_gender}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
         </div>
-        
+
+        <div className="form-group">
+          <label>Address
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_address"
+            value={employee.employee_address}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Mobile Number
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_mobile"
+            value={employee.employee_mobile}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Home Phone
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_home_phone"
+            value={employee.employee_home_phone}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Date of Birth
+          <span className="required">*</span>
+          </label>
+          <input
+            type="date"
+            className="form-control"
+            name="employee_dob"
+            value={employee.employee_dob}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>National Identification
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_nat_id"
+            value={employee.employee_nat_id}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>National Identification Expiry Date
+          <span className="required">*</span>
+          </label>
+          <input
+            type="date"
+            className="form-control"
+            name="employee_natidexpiry"
+            value={employee.employee_natidexpiry}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+        <label>Race
+        <span className="required">*</span>
+        </label>
+        <select
+          className="form-control"
+          name="employee_race"
+          value={employee.employee_race}
+          onChange={handleInputChange}
+          required
+        >
+        <option value="">Select Race</option>
+        {countries.map((country) => (
+          <option key={country.code} value={country.name}>
+            {country.name}
+          </option>
+        ))}
+      </select>
+     </div>
+
+
+     <div className="form-group">
+      <label>Nationality
+      <span className="required">*</span>
+      </label>
+      <select
+        className="form-control"
+        name="employee_nationality"
+        value={employee.employee_nationality}
+        onChange={handleInputChange}
+        required
+      >
+        <option value="">Select Nationality</option>
+        {countries.map((country) => (
+          <option key={country.code} value={country.name}>
+            {country.name}
+          </option>
+        ))}
+      </select> 
+      </div>
+
+        <div className="form-group">
+          <label>Basic Salary
+          <span className="required">*</span>
+          </label>
+          <input
+            type="float"
+            className="form-control"
+            name="employee_basic_salary"
+            value={employee.employee_basic_salary}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Work Start Date
+          <span className="required">*</span>
+          </label>
+          <input
+            type="date"
+            className="form-control"
+            name="employee_startdate"
+            value={employee.employee_startdate}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Emergency Contact Person
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_emergency_name"
+            value={employee.employee_emergency_name}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Emergency Phone Number
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_emergency_phone"
+            value={employee.employee_emergency_phone}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Permanent Residence
+          <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            name="employee_perm_add"
+            value={employee.employee_perm_add}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Photo</label>
+          <input
+            type="file"
+            className="form-control"
+            name="employee_photo"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Signature</label>
+          <input
+            type="file"
+            className="form-control"
+            name="employee_signature"
+            accept="image/*"
+            onChange={handleSignatureUpload}
+          />
+        </div>
+
+        <div className="form-group">
+          <button type="submit" className="btn btn-primary">Create new profile</button>
+        </div>
       </form>
+      </div>
     </div>
-      </div >
-    </div >
   );
-};
-
+}
 export default EmployeeForm;
